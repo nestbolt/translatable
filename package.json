@@ -1,0 +1,84 @@
+{
+  "name": "@nestbolt/translatable",
+  "version": "0.1.0",
+  "packageManager": "pnpm@9.15.4",
+  "description": "NestJS + TypeORM package for JSON-based model translations with locale-aware getters, fallback resolution, and query helpers",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:cov": "vitest run --coverage",
+    "lint": "eslint 'src/**/*.ts' 'test/**/*.ts'",
+    "lint:fix": "eslint 'src/**/*.ts' 'test/**/*.ts' --fix",
+    "format": "prettier --write 'src/**/*.ts' 'test/**/*.ts'",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "nestjs",
+    "typeorm",
+    "translatable",
+    "translations",
+    "i18n",
+    "multilingual",
+    "jsonb",
+    "locale",
+    "internationalization"
+  ],
+  "author": "Nestbolt",
+  "license": "MIT",
+  "homepage": "https://github.com/nestbolt/translatable#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nestbolt/translatable"
+  },
+  "bugs": {
+    "url": "https://github.com/nestbolt/translatable/issues"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^10.0.0 || ^11.0.0",
+    "@nestjs/core": "^10.0.0 || ^11.0.0",
+    "class-transformer": "^0.5.0",
+    "class-validator": "^0.14.0",
+    "reflect-metadata": "^0.1.13 || ^0.2.0",
+    "typeorm": "^0.3.0"
+  },
+  "peerDependenciesMeta": {
+    "@nestjs/event-emitter": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/core": "^11.0.0",
+    "@nestjs/event-emitter": "^3.0.0",
+    "@nestjs/testing": "^11.0.0",
+    "@types/node": "^20.0.0",
+    "@vitest/coverage-v8": "^4.1.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
+    "eslint": "^10.0.3",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "prettier": "^3.8.1",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "^0.3.20",
+    "typescript": "^5.5.0",
+    "typescript-eslint": "^8.57.1",
+    "vitest": "^4.1.0"
+  }
+}
