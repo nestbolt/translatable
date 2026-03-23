@@ -125,4 +125,44 @@ describe('TranslatableSubscriber', () => {
       expect(entity.name).toBe('hello');
     });
   });
+
+  describe('edge cases', () => {
+    it('should handle null entity in getTranslatableFields', () => {
+      // afterLoad with null — should not throw
+      expect(() => subscriber.afterLoad(null as any)).not.toThrow();
+    });
+
+    it('should handle entity without constructor', () => {
+      const entity = Object.create(null);
+      expect(() => subscriber.afterLoad(entity)).not.toThrow();
+    });
+
+    it('should handle null values in serialization (beforeInsert)', () => {
+      const entity = new TestProduct();
+      entity.name = { en: 'Hello', fr: null } as any;
+
+      subscriber.beforeInsert({ entity } as any);
+
+      expect(entity.name).toEqual({ en: 'Hello' });
+    });
+
+    it('should skip non-object translatable fields during serialization', () => {
+      const entity = new TestProduct();
+      (entity as any).name = 'plain string';
+
+      subscriber.beforeInsert({ entity } as any);
+
+      // Non-object values are left as-is
+      expect(entity.name).toBe('plain string');
+    });
+
+    it('should skip array translatable fields during serialization', () => {
+      const entity = new TestProduct();
+      (entity as any).name = ['a', 'b'];
+
+      subscriber.beforeInsert({ entity } as any);
+
+      expect(entity.name).toEqual(['a', 'b']);
+    });
+  });
 });

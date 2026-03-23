@@ -7,6 +7,7 @@ import {
 import { TranslatableService } from './translatable.service';
 import { TranslatableSubscriber } from './translatable.subscriber';
 import { IsTranslationsConstraint } from './validators';
+import { TranslatableInterceptor } from './middleware';
 
 @Module({})
 export class TranslatableModule {
@@ -20,11 +21,13 @@ export class TranslatableModule {
         { provide: TRANSLATABLE_OPTIONS, useValue: options },
         TranslatableService,
         TranslatableSubscriber,
+        TranslatableInterceptor,
         IsTranslationsConstraint,
       ],
       exports: [
         TranslatableService,
         TranslatableSubscriber,
+        TranslatableInterceptor,
         IsTranslationsConstraint,
       ],
     };
@@ -43,11 +46,13 @@ export class TranslatableModule {
         },
         TranslatableService,
         TranslatableSubscriber,
+        TranslatableInterceptor,
         IsTranslationsConstraint,
       ],
       exports: [
         TranslatableService,
         TranslatableSubscriber,
+        TranslatableInterceptor,
         IsTranslationsConstraint,
       ],
     };

@@ -7,7 +7,7 @@ import { TranslationHasBeenSetEvent } from './events';
 let EventEmitter2: any;
 try {
   EventEmitter2 = require('@nestjs/event-emitter').EventEmitter2;
-} catch {
+} catch /* v8 ignore next */ {
   EventEmitter2 = null;
 }
 

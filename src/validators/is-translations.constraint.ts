@@ -30,8 +30,7 @@ export class IsTranslationsConstraint
     }
 
     const entries = Object.entries(value);
-    for (const [key, val] of entries) {
-      if (typeof key !== 'string') return false;
+    for (const [, val] of entries) {
       if (typeof val !== 'string' && val !== null) return false;
     }
 

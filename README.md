@@ -12,38 +12,36 @@
 
 <hr>
 
-This package provides a **mixin and decorator system** for [NestJS](https://nestjs.com) that stores translations as JSON objects in your database columns — no separate translations table needed.
+This package provides **automatic locale-aware API responses** for [NestJS](https://nestjs.com) + TypeORM. Translations are stored as JSON objects in your database columns — no separate translations table needed.
 
-Once installed, using it is as simple as:
+Send an `Accept-Language` header and your API returns resolved strings automatically:
 
-```typescript
-@Entity()
-class Product extends TranslatableMixin(BaseEntity) {
-  @Translatable()
-  @Column({ type: "jsonb", default: {} })
-  name: Record<string, string>;
-}
+```
+GET /products/1
+Accept-Language: ar
 
-const product = new Product();
-product
-  .setTranslation("name", "en", "Laptop")
-  .setTranslation("name", "ar", "حاسوب محمول");
+→ { "name": "حاسوب محمول", "slug": "laptop" }
+```
 
-product.getTranslation("name", "en"); // 'Laptop'
-product.getTranslation("name", "ar"); // 'حاسوب محمول'
+No header? You get the full translation map:
+
+```
+GET /products/1
+
+→ { "name": { "en": "Laptop", "ar": "حاسوب محمول" }, "slug": "laptop" }
 ```
 
 ## Table of Contents
 
 - [Installation](#installation)
 - [Quick Start](#quick-start)
+- [Automatic Locale Resolution (Middleware + Interceptor)](#automatic-locale-resolution-middleware--interceptor)
 - [Module Configuration](#module-configuration)
   - [Static Configuration (forRoot)](#static-configuration-forroot)
   - [Async Configuration (forRootAsync)](#async-configuration-forrootasync)
 - [Using the Mixin](#using-the-mixin)
 - [Translation Methods](#translation-methods)
 - [Using the Service Directly](#using-the-service-directly)
-- [Request-Scoped Locale](#request-scoped-locale)
 - [Validation](#validation)
 - [Query Helpers](#query-helpers)
 - [Events](#events)
@@ -160,6 +158,100 @@ item.getTranslations("name");
 item.locales(); // ['en', 'ar', 'fr']
 ```
 
+## Automatic Locale Resolution (Middleware + Interceptor)
+
+The recommended way to use this package is with the built-in `TranslatableMiddleware` and `TranslatableInterceptor`. This gives you automatic locale-aware API responses with zero boilerplate in your controllers.
+
+### How it works
+
+1. **`TranslatableMiddleware`** reads the `Accept-Language` header and sets the locale for the request via `AsyncLocalStorage`
+2. **`TranslatableInterceptor`** (already registered globally by the module) auto-resolves translatable fields in your API responses
+
+**With `Accept-Language` header** — translatable fields are resolved to a single string in the requested locale:
+
+```json
+// GET /products/1 — Accept-Language: ar
+{ "id": 1, "name": "حاسوب محمول", "slug": "laptop" }
+```
+
+**Without `Accept-Language` header** — translatable fields return the full JSON translation map:
+
+```json
+// GET /products/1 — no Accept-Language header
+{ "id": 1, "name": { "en": "Laptop", "ar": "حاسوب محمول" }, "slug": "laptop" }
+```
+
+### Setup
+
+**1. Apply the middleware in your `AppModule`:**
+
+```typescript
+import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
+import {
+  TranslatableModule,
+  TranslatableMiddleware,
+} from "@nestbolt/translatable";
+
+@Module({
+  imports: [
+    TranslatableModule.forRoot({
+      defaultLocale: "en",
+      fallbackLocale: "en",
+    }),
+  ],
+})
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(TranslatableMiddleware).forRoutes("*");
+  }
+}
+```
+
+That's it! The `TranslatableInterceptor` is automatically registered as a global provider by `TranslatableModule`. Your controllers need no changes:
+
+```typescript
+@Controller("products")
+export class ProductController {
+  constructor(
+    @InjectRepository(Product)
+    private readonly repo: Repository<Product>,
+  ) {}
+
+  @Get()
+  findAll() {
+    return this.repo.find();
+  }
+
+  @Get(":id")
+  findOne(@Param("id") id: number) {
+    return this.repo.findOneBy({ id });
+  }
+}
+```
+
+### Fallback Behavior
+
+When the requested locale is missing for a field, the interceptor falls back to:
+1. The configured `fallbackLocale` (default: `'en'`)
+2. Any available locale (if `fallbackAny: true` is configured)
+3. `null` if no translation is found
+
+### Wrapped Responses
+
+The interceptor handles nested structures automatically:
+
+```typescript
+// Paginated response
+@Get()
+async findAll() {
+  const [data, total] = await this.repo.findAndCount();
+  return { data, total };
+}
+
+// With Accept-Language: ar →
+// { "data": [{ "name": "حاسوب محمول", ... }], "total": 5 }
+```
+
 ## Module Configuration
 
 ### Static Configuration (forRoot)
@@ -243,26 +335,6 @@ export class MyService {
 | `getFallbackLocale()`                              | `string` | Get configured fallback locale                         |
 | `runWithLocale(locale, fn)`                        | `T`      | Execute a function with a specific locale context      |
 | `resolveLocale(requested, available, useFallback)` | `string` | Resolve the best locale to use                         |
-
-## Request-Scoped Locale
-
-Use `runWithLocale` in middleware or interceptors to set the locale per request:
-
-```typescript
-@Injectable()
-export class LocaleMiddleware implements NestMiddleware {
-  constructor(private translatableService: TranslatableService) {}
-
-  use(req: Request, res: Response, next: NextFunction) {
-    const locale = req.headers["accept-language"]?.split(",")[0] || "en";
-    this.translatableService.runWithLocale(locale, () => {
-      next();
-    });
-  }
-}
-```
-
-Then `entity.getTranslation('name')` (without a locale argument) automatically uses the request locale.
 
 ## Validation
 

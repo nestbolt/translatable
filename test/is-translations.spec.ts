@@ -152,5 +152,16 @@ describe('IsTranslations decorator', () => {
         'valid translation map',
       );
     });
+
+    it('should return message with required locales when specified', () => {
+      const constraint = new IsTranslationsConstraint();
+      const args = {
+        constraints: [{ requiredLocales: ['en', 'ar'] }],
+      } as any;
+      const message = constraint.defaultMessage(args);
+      expect(message).toContain('required locales');
+      expect(message).toContain('en');
+      expect(message).toContain('ar');
+    });
   });
 });

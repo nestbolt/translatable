@@ -21,6 +21,9 @@ export type { TranslatableEntity } from './mixins';
 // Subscriber
 export { TranslatableSubscriber } from './translatable.subscriber';
 
+// Middleware & Interceptor
+export { TranslatableMiddleware, TranslatableInterceptor } from './middleware';
+
 // Validators
 export { IsTranslationsConstraint } from './validators';
 export type { IsTranslationsOptions } from './validators';
