@@ -417,6 +417,39 @@ describe('TranslatableMixin', () => {
       entity.setTranslation('name', 'fr', 'Bonjour');
       expect(entity.getTranslation('name', 'en', false)).toBeNull();
     });
+
+    it('should default to "en" locale when no locale arg and no service', () => {
+      entity.setTranslation('name', 'en', 'English');
+      // No locale argument, no service → defaults to 'en'
+      expect(entity.getTranslation('name')).toBe('English');
+    });
+
+    it('should default to "en" locale for hasTranslation without locale or service', () => {
+      entity.setTranslation('name', 'en', 'Hello');
+      // No locale argument, no service → defaults to 'en'
+      expect(entity.hasTranslation('name')).toBe(true);
+    });
+
+    it('should return false for hasTranslation when "en" default is missing', () => {
+      entity.setTranslation('name', 'fr', 'Bonjour');
+      // No locale argument, no service → defaults to 'en', which is missing
+      expect(entity.hasTranslation('name')).toBe(false);
+    });
+
+    it('should return null when no translations exist and no service (fallback path)', () => {
+      // No translations set at all, no service
+      // Tests line 68: translatedLocales[0] ?? requestedLocale (empty array → requestedLocale)
+      expect(entity.getTranslation('name', 'en')).toBeNull();
+    });
+
+    it('should return empty array for getTranslatableAttributes on class without decorators', () => {
+      class Plain extends TranslatableMixin(class {}) {
+        title: string = '';
+      }
+      const plain = new Plain();
+      // No @Translatable() decorators → Reflect.getMetadata returns undefined → || []
+      expect(plain.getTranslatableAttributes()).toEqual([]);
+    });
   });
 
   describe('zero value handling', () => {
@@ -455,6 +488,13 @@ describe('TranslatableMixin', () => {
 
       expect(entity1.getTranslation('name', 'en')).toBe('First');
       expect(entity2.getTranslation('name', 'en')).toBe('Second');
+    });
+
+    it('should return empty map when field value is an array', async () => {
+      await setupService();
+
+      (entity as any).name = ['not', 'an', 'object'];
+      expect(entity.getTranslations('name')).toEqual({});
     });
   });
 });
