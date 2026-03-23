@@ -1,46 +1,46 @@
-import { describe, it, expect, afterEach } from 'vitest';
-import 'reflect-metadata';
-import { Module } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
-import { TranslatableModule } from '../src/translatable.module';
-import { TranslatableService } from '../src/translatable.service';
-import { TranslatableSubscriber } from '../src/translatable.subscriber';
-import { IsTranslationsConstraint } from '../src/validators';
+import { describe, it, expect, afterEach } from "vitest";
+import "reflect-metadata";
+import { Module } from "@nestjs/common";
+import { Test, TestingModule } from "@nestjs/testing";
+import { TranslatableModule } from "../src/translatable.module";
+import { TranslatableService } from "../src/translatable.service";
+import { TranslatableSubscriber } from "../src/translatable.subscriber";
+import { IsTranslationsConstraint } from "../src/validators";
 
-describe('TranslatableModule', () => {
+describe("TranslatableModule", () => {
   afterEach(() => {
     TranslatableService.resetInstance();
   });
 
-  describe('forRoot', () => {
-    it('should create module with default options', async () => {
+  describe("forRoot", () => {
+    it("should create module with default options", async () => {
       const module: TestingModule = await Test.createTestingModule({
         imports: [TranslatableModule.forRoot()],
       }).compile();
 
       const service = module.get<TranslatableService>(TranslatableService);
       expect(service).toBeDefined();
-      expect(service.getDefaultLocale()).toBe('en');
+      expect(service.getDefaultLocale()).toBe("en");
     });
 
-    it('should create module with custom options', async () => {
+    it("should create module with custom options", async () => {
       const module: TestingModule = await Test.createTestingModule({
         imports: [
           TranslatableModule.forRoot({
-            defaultLocale: 'ar',
-            fallbackLocale: 'en',
+            defaultLocale: "ar",
+            fallbackLocale: "en",
             fallbackAny: true,
           }),
         ],
       }).compile();
 
       const service = module.get<TranslatableService>(TranslatableService);
-      expect(service.getDefaultLocale()).toBe('ar');
-      expect(service.getFallbackLocale()).toBe('en');
+      expect(service.getDefaultLocale()).toBe("ar");
+      expect(service.getFallbackLocale()).toBe("en");
       expect(service.getFallbackAny()).toBe(true);
     });
 
-    it('should export TranslatableService', async () => {
+    it("should export TranslatableService", async () => {
       const module: TestingModule = await Test.createTestingModule({
         imports: [TranslatableModule.forRoot()],
       }).compile();
@@ -50,7 +50,7 @@ describe('TranslatableModule', () => {
       ).toBeDefined();
     });
 
-    it('should export TranslatableSubscriber', async () => {
+    it("should export TranslatableSubscriber", async () => {
       const module: TestingModule = await Test.createTestingModule({
         imports: [TranslatableModule.forRoot()],
       }).compile();
@@ -60,7 +60,7 @@ describe('TranslatableModule', () => {
       ).toBeDefined();
     });
 
-    it('should export IsTranslationsConstraint', async () => {
+    it("should export IsTranslationsConstraint", async () => {
       const module: TestingModule = await Test.createTestingModule({
         imports: [TranslatableModule.forRoot()],
       }).compile();
@@ -70,37 +70,35 @@ describe('TranslatableModule', () => {
       ).toBeDefined();
     });
 
-    it('should be a global module', () => {
+    it("should be a global module", () => {
       const dynamicModule = TranslatableModule.forRoot();
       expect(dynamicModule.global).toBe(true);
     });
   });
 
-  describe('forRootAsync', () => {
-    it('should create module with async factory', async () => {
+  describe("forRootAsync", () => {
+    it("should create module with async factory", async () => {
       const module: TestingModule = await Test.createTestingModule({
         imports: [
           TranslatableModule.forRootAsync({
             useFactory: () => ({
-              defaultLocale: 'fr',
-              fallbackLocale: 'en',
+              defaultLocale: "fr",
+              fallbackLocale: "en",
             }),
           }),
         ],
       }).compile();
 
       const service = module.get<TranslatableService>(TranslatableService);
-      expect(service.getDefaultLocale()).toBe('fr');
-      expect(service.getFallbackLocale()).toBe('en');
+      expect(service.getDefaultLocale()).toBe("fr");
+      expect(service.getFallbackLocale()).toBe("en");
     });
 
-    it('should support inject parameter', async () => {
-      const CONFIG_TOKEN = 'APP_CONFIG';
+    it("should support inject parameter", async () => {
+      const CONFIG_TOKEN = "APP_CONFIG";
 
       @Module({
-        providers: [
-          { provide: CONFIG_TOKEN, useValue: { locale: 'de' } },
-        ],
+        providers: [{ provide: CONFIG_TOKEN, useValue: { locale: "de" } }],
         exports: [CONFIG_TOKEN],
       })
       class ConfigModule {}
@@ -118,10 +116,10 @@ describe('TranslatableModule', () => {
       }).compile();
 
       const service = module.get<TranslatableService>(TranslatableService);
-      expect(service.getDefaultLocale()).toBe('de');
+      expect(service.getDefaultLocale()).toBe("de");
     });
 
-    it('should be a global module', () => {
+    it("should be a global module", () => {
       const dynamicModule = TranslatableModule.forRootAsync({
         useFactory: () => ({}),
       });

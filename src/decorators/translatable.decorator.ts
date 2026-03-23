@@ -1,5 +1,5 @@
-import 'reflect-metadata';
-import { TRANSLATABLE_METADATA_KEY } from '../translatable.constants';
+import "reflect-metadata";
+import { TRANSLATABLE_METADATA_KEY } from "../translatable.constants";
 
 export function Translatable(): PropertyDecorator {
   return (target: object, propertyKey: string | symbol) => {
@@ -17,6 +17,8 @@ export function Translatable(): PropertyDecorator {
   };
 }
 
-export function getTranslatableFields(target: Function): string[] {
+export function getTranslatableFields(
+  target: abstract new (...args: any[]) => any,
+): string[] {
   return Reflect.getMetadata(TRANSLATABLE_METADATA_KEY, target) || [];
 }

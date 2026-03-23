@@ -1,15 +1,13 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import 'reflect-metadata';
-import { Test, TestingModule } from '@nestjs/testing';
-import { TranslatableMiddleware } from '../src/middleware/translatable.middleware';
-import { TranslatableService } from '../src/translatable.service';
-import { TRANSLATABLE_OPTIONS } from '../src/translatable.constants';
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import "reflect-metadata";
+import { Test, TestingModule } from "@nestjs/testing";
+import { TranslatableMiddleware } from "../src/middleware/translatable.middleware";
+import { TranslatableService } from "../src/translatable.service";
+import { TRANSLATABLE_OPTIONS } from "../src/translatable.constants";
 
 function createMockReq(acceptLanguage?: string) {
   return {
-    headers: acceptLanguage
-      ? { 'accept-language': acceptLanguage }
-      : {},
+    headers: acceptLanguage ? { "accept-language": acceptLanguage } : {},
   } as any;
 }
 
@@ -17,7 +15,7 @@ function createMockRes() {
   return {} as any;
 }
 
-describe('TranslatableMiddleware', () => {
+describe("TranslatableMiddleware", () => {
   let middleware: TranslatableMiddleware;
   let service: TranslatableService;
 
@@ -26,7 +24,7 @@ describe('TranslatableMiddleware', () => {
       providers: [
         {
           provide: TRANSLATABLE_OPTIONS,
-          useValue: { defaultLocale: 'en', fallbackLocale: 'en' },
+          useValue: { defaultLocale: "en", fallbackLocale: "en" },
         },
         TranslatableService,
         TranslatableMiddleware,
@@ -42,8 +40,8 @@ describe('TranslatableMiddleware', () => {
     TranslatableService.resetInstance();
   });
 
-  it('should set locale from Accept-Language header', () => {
-    const req = createMockReq('ar');
+  it("should set locale from Accept-Language header", () => {
+    const req = createMockReq("ar");
     const res = createMockRes();
     let capturedLocale: string | undefined;
 
@@ -51,11 +49,11 @@ describe('TranslatableMiddleware', () => {
       capturedLocale = service.getLocale();
     });
 
-    expect(capturedLocale).toBe('ar');
+    expect(capturedLocale).toBe("ar");
   });
 
-  it('should parse first locale from comma-separated header', () => {
-    const req = createMockReq('fr,en;q=0.9,ar;q=0.8');
+  it("should parse first locale from comma-separated header", () => {
+    const req = createMockReq("fr,en;q=0.9,ar;q=0.8");
     const res = createMockRes();
     let capturedLocale: string | undefined;
 
@@ -63,11 +61,11 @@ describe('TranslatableMiddleware', () => {
       capturedLocale = service.getLocale();
     });
 
-    expect(capturedLocale).toBe('fr');
+    expect(capturedLocale).toBe("fr");
   });
 
-  it('should strip quality value from locale', () => {
-    const req = createMockReq('en-US;q=0.9');
+  it("should strip quality value from locale", () => {
+    const req = createMockReq("en-US;q=0.9");
     const res = createMockRes();
     let capturedLocale: string | undefined;
 
@@ -75,10 +73,10 @@ describe('TranslatableMiddleware', () => {
       capturedLocale = service.getLocale();
     });
 
-    expect(capturedLocale).toBe('en-US');
+    expect(capturedLocale).toBe("en-US");
   });
 
-  it('should use default locale when no Accept-Language header', () => {
+  it("should use default locale when no Accept-Language header", () => {
     const req = createMockReq();
     const res = createMockRes();
     let capturedLocale: string | undefined;
@@ -88,11 +86,11 @@ describe('TranslatableMiddleware', () => {
     });
 
     // No runWithLocale called, so it falls back to default
-    expect(capturedLocale).toBe('en');
+    expect(capturedLocale).toBe("en");
   });
 
-  it('should use default locale when Accept-Language is empty string', () => {
-    const req = createMockReq('');
+  it("should use default locale when Accept-Language is empty string", () => {
+    const req = createMockReq("");
     const res = createMockRes();
     let capturedLocale: string | undefined;
 
@@ -100,11 +98,11 @@ describe('TranslatableMiddleware', () => {
       capturedLocale = service.getLocale();
     });
 
-    expect(capturedLocale).toBe('en');
+    expect(capturedLocale).toBe("en");
   });
 
-  it('should call next()', () => {
-    const req = createMockReq('ar');
+  it("should call next()", () => {
+    const req = createMockReq("ar");
     const res = createMockRes();
     const next = vi.fn();
 
@@ -113,7 +111,7 @@ describe('TranslatableMiddleware', () => {
     expect(next).toHaveBeenCalledOnce();
   });
 
-  it('should call next() even without header', () => {
+  it("should call next() even without header", () => {
     const req = createMockReq();
     const res = createMockRes();
     const next = vi.fn();
@@ -123,20 +121,20 @@ describe('TranslatableMiddleware', () => {
     expect(next).toHaveBeenCalledOnce();
   });
 
-  it('should restore locale after request completes', () => {
-    const req = createMockReq('ar');
+  it("should restore locale after request completes", () => {
+    const req = createMockReq("ar");
     const res = createMockRes();
 
     middleware.use(req, res, () => {
-      expect(service.getLocale()).toBe('ar');
+      expect(service.getLocale()).toBe("ar");
     });
 
     // Outside the middleware context, back to default
-    expect(service.getLocale()).toBe('en');
+    expect(service.getLocale()).toBe("en");
   });
 
-  it('should handle header with only commas', () => {
-    const req = createMockReq(',,,');
+  it("should handle header with only commas", () => {
+    const req = createMockReq(",,,");
     const res = createMockRes();
     let capturedLocale: string | undefined;
 
@@ -145,11 +143,11 @@ describe('TranslatableMiddleware', () => {
     });
 
     // Empty after split → falls back to default
-    expect(capturedLocale).toBe('en');
+    expect(capturedLocale).toBe("en");
   });
 
-  it('should handle header with only semicolons', () => {
-    const req = createMockReq(';q=0.9');
+  it("should handle header with only semicolons", () => {
+    const req = createMockReq(";q=0.9");
     const res = createMockRes();
     let capturedLocale: string | undefined;
 
@@ -158,6 +156,6 @@ describe('TranslatableMiddleware', () => {
     });
 
     // Empty locale after splitting on semicolons → falls back to default
-    expect(capturedLocale).toBe('en');
+    expect(capturedLocale).toBe("en");
   });
 });
