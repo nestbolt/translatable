@@ -82,13 +82,13 @@ describe("TranslatableService", () => {
       expect(service.getFallbackLocale()).toBe("en");
     });
 
-    it("should fall back to defaultLocale when fallbackLocales is empty", async () => {
+    it("should normalize empty fallbackLocales to [defaultLocale]", async () => {
       service = await createService({
         defaultLocale: "ar",
         fallbackLocales: [],
       });
 
-      expect(service.getFallbackLocales()).toEqual([]);
+      expect(service.getFallbackLocales()).toEqual(["ar"]);
       expect(service.getFallbackLocale()).toBe("ar");
     });
 

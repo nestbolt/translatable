@@ -246,7 +246,7 @@ entity.getTranslation('name', 'de'); // 'Bonjour' — skipped 'en', found 'fr'
 
 Resolution order:
 1. The requested locale
-2. Each locale in `fallbackLocales` in order (default: `['en']`)
+2. Each locale in `fallbackLocales` in order (default: `[defaultLocale]`)
 3. Any available locale (if `fallbackAny: true` is configured)
 4. `null` if no translation is found
 
@@ -285,7 +285,7 @@ TranslatableModule.forRootAsync({
   imports: [ConfigModule],
   useFactory: (config: ConfigService) => ({
     defaultLocale: config.get("DEFAULT_LOCALE"),
-    fallbackLocales: config.get("FALLBACK_LOCALES"),
+    fallbackLocales: config.get<string[]>("FALLBACK_LOCALES"),
   }),
   inject: [ConfigService],
 });

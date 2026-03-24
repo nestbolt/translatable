@@ -29,11 +29,13 @@ export class TranslatableService implements OnModuleInit {
     @Optional() @Inject("EventEmitter2") eventEmitter?: any,
   ) {
     this.defaultLocale = options.defaultLocale ?? "en";
-    this.fallbackLocales =
+    const fallbackLocales =
       options.fallbackLocales ??
-      (options.fallbackLocale
-        ? [options.fallbackLocale]
-        : [this.defaultLocale]);
+      (options.fallbackLocale ? [options.fallbackLocale] : undefined);
+    this.fallbackLocales =
+      fallbackLocales && fallbackLocales.length > 0
+        ? fallbackLocales
+        : [this.defaultLocale];
     this.fallbackAny = options.fallbackAny ?? false;
 
     if (eventEmitter) {
@@ -61,7 +63,7 @@ export class TranslatableService implements OnModuleInit {
   }
 
   getFallbackLocale(): string {
-    return this.fallbackLocales[0] ?? this.defaultLocale;
+    return this.fallbackLocales[0];
   }
 
   getFallbackLocales(): string[] {
