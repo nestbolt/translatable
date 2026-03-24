@@ -28,17 +28,34 @@ export class TranslatableInterceptor implements NestInterceptor {
 
     if (skip) return next.handle();
 
-    const request = context.switchToHttp().getRequest<Request>();
-    const hasLocaleHeader = !!request.headers["accept-language"];
+    const acceptLanguage = this.extractAcceptLanguage(context);
 
     return next.handle().pipe(
       map((data) => {
-        if (!hasLocaleHeader) return data;
+        if (!acceptLanguage) return data;
 
         const locale = this.translatableService.getLocale();
         return this.resolveTranslations(data, locale);
       }),
     );
+  }
+
+  private extractAcceptLanguage(context: ExecutionContext): string | undefined {
+    const type = context.getType<string>();
+
+    if (type === "http") {
+      const request = context.switchToHttp().getRequest<Request>();
+      return request.headers["accept-language"] as string | undefined;
+    }
+
+    if (type === "graphql") {
+      const gqlContext = context.getArgs()[2];
+      return gqlContext?.req?.headers?.["accept-language"] as
+        | string
+        | undefined;
+    }
+
+    return undefined;
   }
 
   private resolveTranslations(data: any, locale: string): any {

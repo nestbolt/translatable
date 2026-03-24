@@ -60,6 +60,9 @@
   "peerDependenciesMeta": {
     "@nestjs/event-emitter": {
       "optional": true
+    },
+    "@nestjs/graphql": {
+      "optional": true
     }
   },
   "devDependencies": {
@@ -67,6 +70,7 @@
     "@nestjs/common": "^11.0.0",
     "@nestjs/core": "^11.0.0",
     "@nestjs/event-emitter": "^3.0.0",
+    "@nestjs/graphql": "^13.2.4",
     "@nestjs/testing": "^11.0.0",
     "@types/express": "^5.0.6",
     "@types/node": "^20.0.0",
@@ -76,6 +80,7 @@
     "eslint": "^10.0.3",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
+    "graphql": "^16.13.2",
     "prettier": "^3.8.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",

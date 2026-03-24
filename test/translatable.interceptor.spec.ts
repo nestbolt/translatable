@@ -21,6 +21,7 @@ class TestProduct extends TranslatableMixin(class {}) {
 
 function createMockContext(acceptLanguage?: string) {
   return {
+    getType: () => "http",
     switchToHttp: () => ({
       getRequest: () => ({
         headers: acceptLanguage ? { "accept-language": acceptLanguage } : {},
