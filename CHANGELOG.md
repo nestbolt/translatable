@@ -2,6 +2,19 @@
 
 All notable changes to `@nestbolt/translatable` will be documented in this file.
 
+## v0.3.0 — Completeness Helpers & Skip Translation
+
+### Features
+
+- **Translation Completeness Helpers** — New mixin methods for checking translation coverage
+  - `getMissingLocales(key, locales)` — returns locales missing translations for a field
+  - `isFullyTranslated(locales)` — checks if all fields have all requested locales
+  - `getTranslationCompleteness(locales)` — returns a per-field, per-locale boolean report
+- **@SkipTranslation() decorator** — Bypass auto-resolution on specific routes or controllers
+  - Apply to a route handler to return full JSON translation maps regardless of `Accept-Language` header
+  - Apply to a controller class to skip resolution for all routes in that controller
+  - Useful for admin panels and CMS dashboards that need to edit translations
+
 ## v0.2.0 — Automatic Locale Resolution
 
 ### Features

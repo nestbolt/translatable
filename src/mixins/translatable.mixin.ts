@@ -26,6 +26,11 @@ export interface TranslatableEntity {
   hasTranslation(key: string, locale?: string): boolean;
   getTranslatedLocales(key: string): string[];
   locales(): string[];
+  getMissingLocales(key: string, locales: string[]): string[];
+  isFullyTranslated(locales: string[]): boolean;
+  getTranslationCompleteness(
+    locales: string[],
+  ): Record<string, Record<string, boolean>>;
 }
 
 export function TranslatableMixin<TBase extends Constructor>(Base: TBase) {
@@ -177,6 +182,36 @@ export function TranslatableMixin<TBase extends Constructor>(Base: TBase) {
         }
       }
       return Array.from(allLocales);
+    }
+
+    getMissingLocales(key: string, locales: string[]): string[] {
+      this.guardTranslatableAttribute(key);
+
+      const translated = this.getTranslatedLocales(key);
+      return locales.filter((l) => !translated.includes(l));
+    }
+
+    isFullyTranslated(locales: string[]): boolean {
+      for (const field of this.getTranslatableAttributes()) {
+        if (this.getMissingLocales(field, locales).length > 0) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    getTranslationCompleteness(
+      locales: string[],
+    ): Record<string, Record<string, boolean>> {
+      const result: Record<string, Record<string, boolean>> = {};
+      for (const field of this.getTranslatableAttributes()) {
+        const translated = this.getTranslatedLocales(field);
+        result[field] = {};
+        for (const locale of locales) {
+          result[field][locale] = translated.includes(locale);
+        }
+      }
+      return result;
     }
 
     /** @internal */

@@ -41,6 +41,8 @@ GET /products/1
   - [Async Configuration (forRootAsync)](#async-configuration-forrootasync)
 - [Using the Mixin](#using-the-mixin)
 - [Translation Methods](#translation-methods)
+- [Translation Completeness](#translation-completeness)
+- [Skip Translation (Admin Routes)](#skip-translation-admin-routes)
 - [Using the Service Directly](#using-the-service-directly)
 - [Validation](#validation)
 - [Query Helpers](#query-helpers)
@@ -311,6 +313,72 @@ class Product extends TranslatableMixin(class {}) {
 | `locales()`                                  | `string[]`                                         | Get all locales across all fields    |
 | `isTranslatableAttribute(key)`               | `boolean`                                          | Check if a field is translatable     |
 | `getTranslatableAttributes()`                | `string[]`                                         | Get all translatable field names     |
+| `getMissingLocales(key, locales)`            | `string[]`                                         | Get locales missing for a field      |
+| `isFullyTranslated(locales)`                 | `boolean`                                          | Check all fields have all locales    |
+| `getTranslationCompleteness(locales)`        | `Record<string, Record<string, boolean>>`          | Completeness report per field/locale |
+
+## Translation Completeness
+
+Check which locales are missing translations — useful for admin dashboards and CI checks:
+
+```typescript
+const item = new NewsItem();
+item
+  .setTranslation("name", "en", "Hello")
+  .setTranslation("name", "ar", "مرحبا")
+  .setTranslation("description", "en", "A greeting");
+
+// What's missing for a specific field?
+item.getMissingLocales("name", ["en", "ar", "fr"]); // ['fr']
+
+// Are all fields fully translated?
+item.isFullyTranslated(["en", "ar"]); // false (description missing 'ar')
+
+// Get a full report
+item.getTranslationCompleteness(["en", "ar", "fr"]);
+// {
+//   name:        { en: true, ar: true,  fr: false },
+//   description: { en: true, ar: false, fr: false }
+// }
+```
+
+## Skip Translation (Admin Routes)
+
+Use `@SkipTranslation()` to bypass auto-resolution on specific routes. This is useful for admin panels that need the full JSON translation map for editing:
+
+```typescript
+import { SkipTranslation } from "@nestbolt/translatable";
+
+@Controller("products")
+export class ProductController {
+  @Get()
+  findAll() {
+    return this.repo.find();
+    // With Accept-Language: ar → { "name": "حاسوب محمول" }
+  }
+
+  @SkipTranslation()
+  @Get("admin")
+  findAllAdmin() {
+    return this.repo.find();
+    // Always returns full JSON → { "name": { "en": "Laptop", "ar": "حاسوب محمول" } }
+  }
+}
+```
+
+You can also apply it to an entire controller:
+
+```typescript
+@SkipTranslation()
+@Controller("admin/products")
+export class AdminProductController {
+  @Get()
+  findAll() {
+    return this.repo.find();
+    // Always returns full JSON, regardless of Accept-Language header
+  }
+}
+```
 
 ## Using the Service Directly
 

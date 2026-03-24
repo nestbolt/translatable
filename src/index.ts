@@ -13,6 +13,7 @@ export {
 // Decorators
 export { Translatable, getTranslatableFields } from "./decorators";
 export { IsTranslations } from "./decorators";
+export { SkipTranslation } from "./decorators";
 
 // Mixin
 export { TranslatableMixin } from "./mixins";

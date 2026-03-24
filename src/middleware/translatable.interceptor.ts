@@ -4,16 +4,30 @@ import {
   Injectable,
   NestInterceptor,
 } from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
 import { Observable, map } from "rxjs";
 import { Request } from "express";
-import { TRANSLATABLE_METADATA_KEY } from "../translatable.constants";
+import {
+  SKIP_TRANSLATION_KEY,
+  TRANSLATABLE_METADATA_KEY,
+} from "../translatable.constants";
 import { TranslatableService } from "../translatable.service";
 
 @Injectable()
 export class TranslatableInterceptor implements NestInterceptor {
-  constructor(private readonly translatableService: TranslatableService) {}
+  constructor(
+    private readonly translatableService: TranslatableService,
+    private readonly reflector: Reflector,
+  ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    const skip = this.reflector.getAllAndOverride<boolean>(
+      SKIP_TRANSLATION_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+
+    if (skip) return next.handle();
+
     const request = context.switchToHttp().getRequest<Request>();
     const hasLocaleHeader = !!request.headers["accept-language"];
 
