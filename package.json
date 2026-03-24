@@ -1,6 +1,6 @@
 {
   "name": "@nestbolt/translatable",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "packageManager": "pnpm@9.15.4",
   "description": "NestJS + TypeORM package for JSON-based model translations with locale-aware getters, fallback resolution, and query helpers",
   "main": "dist/index.js",
