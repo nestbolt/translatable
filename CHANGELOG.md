@@ -2,6 +2,13 @@
 
 All notable changes to `@nestbolt/translatable` will be documented in this file.
 
+## v0.3.1 — Validation Fixes
+
+### Fixes
+
+- **@IsTranslations()** — Now throws a clear error when applied to symbol-keyed properties instead of silently registering validators that never run
+- **IsTranslationsConstraint** — Made stateless by removing instance field; uses local variable in `validate()` to be safe as a singleton
+
 ## v0.3.0 — Completeness Helpers & Skip Translation
 
 ### Features
