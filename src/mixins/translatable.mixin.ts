@@ -1,8 +1,8 @@
-import 'reflect-metadata';
-import { TRANSLATABLE_METADATA_KEY } from '../translatable.constants';
-import { TranslatableService } from '../translatable.service';
-import { AttributeIsNotTranslatableException } from '../exceptions';
-import { TranslationMap } from '../interfaces';
+import "reflect-metadata";
+import { TRANSLATABLE_METADATA_KEY } from "../translatable.constants";
+import { TranslatableService } from "../translatable.service";
+import { AttributeIsNotTranslatableException } from "../exceptions";
+import { TranslationMap } from "../interfaces";
 
 type Constructor<T = object> = new (...args: any[]) => T;
 
@@ -32,10 +32,7 @@ export function TranslatableMixin<TBase extends Constructor>(Base: TBase) {
   class TranslatableEntityClass extends Base implements TranslatableEntity {
     getTranslatableAttributes(): string[] {
       return (
-        Reflect.getMetadata(
-          TRANSLATABLE_METADATA_KEY,
-          this.constructor,
-        ) || []
+        Reflect.getMetadata(TRANSLATABLE_METADATA_KEY, this.constructor) || []
       );
     }
 
@@ -53,11 +50,10 @@ export function TranslatableMixin<TBase extends Constructor>(Base: TBase) {
       const translations = this.getTranslationMap(key);
       const service = TranslatableService.getInstance();
 
-      const requestedLocale =
-        locale ?? service?.getLocale() ?? 'en';
+      const requestedLocale = locale ?? service?.getLocale() ?? "en";
 
       const translatedLocales = Object.keys(translations).filter(
-        (l) => translations[l] != null && translations[l] !== '',
+        (l) => translations[l] != null && translations[l] !== "",
       );
 
       const resolvedLocale = service
@@ -65,11 +61,11 @@ export function TranslatableMixin<TBase extends Constructor>(Base: TBase) {
         : useFallback
           ? translatedLocales.includes(requestedLocale)
             ? requestedLocale
-            : translatedLocales[0] ?? requestedLocale
+            : (translatedLocales[0] ?? requestedLocale)
           : requestedLocale;
 
       const value = translations[resolvedLocale];
-      if (value == null || value === '') {
+      if (value == null || value === "") {
         return null;
       }
 
@@ -98,17 +94,13 @@ export function TranslatableMixin<TBase extends Constructor>(Base: TBase) {
       return result;
     }
 
-    setTranslation(
-      key: string,
-      locale: string,
-      value: string | null,
-    ): this {
+    setTranslation(key: string, locale: string, value: string | null): this {
       this.guardTranslatableAttribute(key);
 
       const translations = this.getTranslationMap(key);
       const oldValue = translations[locale] ?? null;
 
-      if (value == null || value === '') {
+      if (value == null || value === "") {
         delete translations[locale];
       } else {
         translations[locale] = value;
@@ -162,10 +154,10 @@ export function TranslatableMixin<TBase extends Constructor>(Base: TBase) {
 
       const translations = this.getTranslationMap(key);
       const checkLocale =
-        locale ?? TranslatableService.getInstance()?.getLocale() ?? 'en';
+        locale ?? TranslatableService.getInstance()?.getLocale() ?? "en";
 
       const value = translations[checkLocale];
-      return value != null && value !== '';
+      return value != null && value !== "";
     }
 
     getTranslatedLocales(key: string): string[] {
@@ -173,7 +165,7 @@ export function TranslatableMixin<TBase extends Constructor>(Base: TBase) {
 
       const translations = this.getTranslationMap(key);
       return Object.keys(translations).filter(
-        (l) => translations[l] != null && translations[l] !== '',
+        (l) => translations[l] != null && translations[l] !== "",
       );
     }
 
@@ -191,7 +183,7 @@ export function TranslatableMixin<TBase extends Constructor>(Base: TBase) {
     getTranslationMap(key: string): TranslationMap {
       const raw = (this as any)[key];
       if (raw == null) return {};
-      if (typeof raw === 'object' && !Array.isArray(raw)) return { ...raw };
+      if (typeof raw === "object" && !Array.isArray(raw)) return { ...raw };
       return {};
     }
 
@@ -212,7 +204,7 @@ export function TranslatableMixin<TBase extends Constructor>(Base: TBase) {
     ): TranslationMap {
       const result: TranslationMap = {};
       for (const [locale, value] of Object.entries(translations)) {
-        if (value == null || value === '') continue;
+        if (value == null || value === "") continue;
         if (allowedLocales && !allowedLocales.includes(locale)) continue;
         result[locale] = value;
       }

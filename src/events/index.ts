@@ -1,1 +1,1 @@
-export { TranslationHasBeenSetEvent } from './translation-has-been-set.event';
+export { TranslationHasBeenSetEvent } from "./translation-has-been-set.event";

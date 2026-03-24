@@ -1,38 +1,38 @@
 // Module
-export { TranslatableModule } from './translatable.module';
+export { TranslatableModule } from "./translatable.module";
 
 // Service
-export { TranslatableService } from './translatable.service';
+export { TranslatableService } from "./translatable.service";
 
 // Constants
 export {
   TRANSLATABLE_OPTIONS,
   TRANSLATABLE_METADATA_KEY,
-} from './translatable.constants';
+} from "./translatable.constants";
 
 // Decorators
-export { Translatable, getTranslatableFields } from './decorators';
-export { IsTranslations } from './decorators';
+export { Translatable, getTranslatableFields } from "./decorators";
+export { IsTranslations } from "./decorators";
 
 // Mixin
-export { TranslatableMixin } from './mixins';
-export type { TranslatableEntity } from './mixins';
+export { TranslatableMixin } from "./mixins";
+export type { TranslatableEntity } from "./mixins";
 
 // Subscriber
-export { TranslatableSubscriber } from './translatable.subscriber';
+export { TranslatableSubscriber } from "./translatable.subscriber";
 
 // Middleware & Interceptor
-export { TranslatableMiddleware, TranslatableInterceptor } from './middleware';
+export { TranslatableMiddleware, TranslatableInterceptor } from "./middleware";
 
 // Validators
-export { IsTranslationsConstraint } from './validators';
-export type { IsTranslationsOptions } from './validators';
+export { IsTranslationsConstraint } from "./validators";
+export type { IsTranslationsOptions } from "./validators";
 
 // Events
-export { TranslationHasBeenSetEvent } from './events';
+export { TranslationHasBeenSetEvent } from "./events";
 
 // Exceptions
-export { AttributeIsNotTranslatableException } from './exceptions';
+export { AttributeIsNotTranslatableException } from "./exceptions";
 
 // Query helpers
 export {
@@ -41,11 +41,11 @@ export {
   whereLocale,
   whereLocales,
   orderByTranslation,
-} from './query';
+} from "./query";
 
 // Interfaces
 export type {
   TranslatableModuleOptions,
   TranslatableAsyncOptions,
-} from './interfaces';
-export type { TranslationMap } from './interfaces';
+} from "./interfaces";
+export type { TranslationMap } from "./interfaces";

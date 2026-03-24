@@ -1,15 +1,14 @@
-import { AsyncLocalStorage } from 'node:async_hooks';
-import { Inject, Injectable, Logger, OnModuleInit, Optional } from '@nestjs/common';
-import { TRANSLATABLE_OPTIONS } from './translatable.constants';
-import { TranslatableModuleOptions } from './interfaces';
-import { TranslationHasBeenSetEvent } from './events';
-
-let EventEmitter2: any;
-try {
-  EventEmitter2 = require('@nestjs/event-emitter').EventEmitter2;
-} catch /* v8 ignore next */ {
-  EventEmitter2 = null;
-}
+import {
+  Inject,
+  Injectable,
+  Logger,
+  OnModuleInit,
+  Optional,
+} from "@nestjs/common";
+import { AsyncLocalStorage } from "node:async_hooks";
+import { TranslationHasBeenSetEvent } from "./events";
+import { TranslatableModuleOptions } from "./interfaces";
+import { TRANSLATABLE_OPTIONS } from "./translatable.constants";
 
 @Injectable()
 export class TranslatableService implements OnModuleInit {
@@ -27,9 +26,9 @@ export class TranslatableService implements OnModuleInit {
   constructor(
     @Inject(TRANSLATABLE_OPTIONS)
     options: TranslatableModuleOptions,
-    @Optional() @Inject('EventEmitter2') eventEmitter?: any,
+    @Optional() @Inject("EventEmitter2") eventEmitter?: any,
   ) {
-    this.defaultLocale = options.defaultLocale ?? 'en';
+    this.defaultLocale = options.defaultLocale ?? "en";
     this.fallbackLocale = options.fallbackLocale ?? this.defaultLocale;
     this.fallbackAny = options.fallbackAny ?? false;
 
@@ -107,7 +106,7 @@ export class TranslatableService implements OnModuleInit {
     if (!this.eventEmitter) return;
 
     this.eventEmitter.emit(
-      'translatable.translation-set',
+      "translatable.translation-set",
       new TranslationHasBeenSetEvent(entity, key, locale, oldValue, newValue),
     );
   }

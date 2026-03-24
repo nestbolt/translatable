@@ -1,19 +1,17 @@
-import { DynamicModule, Module } from '@nestjs/common';
-import { TRANSLATABLE_OPTIONS } from './translatable.constants';
+import { DynamicModule, Module } from "@nestjs/common";
+import { TRANSLATABLE_OPTIONS } from "./translatable.constants";
 import {
   TranslatableModuleOptions,
   TranslatableAsyncOptions,
-} from './interfaces';
-import { TranslatableService } from './translatable.service';
-import { TranslatableSubscriber } from './translatable.subscriber';
-import { IsTranslationsConstraint } from './validators';
-import { TranslatableInterceptor } from './middleware';
+} from "./interfaces";
+import { TranslatableService } from "./translatable.service";
+import { TranslatableSubscriber } from "./translatable.subscriber";
+import { IsTranslationsConstraint } from "./validators";
+import { TranslatableInterceptor } from "./middleware";
 
 @Module({})
 export class TranslatableModule {
-  static forRoot(
-    options: TranslatableModuleOptions = {},
-  ): DynamicModule {
+  static forRoot(options: TranslatableModuleOptions = {}): DynamicModule {
     return {
       module: TranslatableModule,
       global: true,

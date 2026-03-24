@@ -4,4 +4,4 @@ export {
   whereLocale,
   whereLocales,
   orderByTranslation,
-} from './translatable-query.helpers';
+} from "./translatable-query.helpers";

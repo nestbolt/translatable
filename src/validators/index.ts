@@ -1,4 +1,4 @@
 export {
   IsTranslationsConstraint,
   IsTranslationsOptions,
-} from './is-translations.constraint';
+} from "./is-translations.constraint";
