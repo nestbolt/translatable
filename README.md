@@ -43,6 +43,7 @@ GET /products/1
 - [Translation Methods](#translation-methods)
 - [Translation Completeness](#translation-completeness)
 - [Skip Translation (Admin Routes)](#skip-translation-admin-routes)
+- [GraphQL Support](#graphql-support)
 - [Using the Service Directly](#using-the-service-directly)
 - [Validation](#validation)
 - [Query Helpers](#query-helpers)
@@ -89,7 +90,9 @@ reflect-metadata  ^0.1.13 || ^0.2.0
 typeorm           ^0.3.0
 ```
 
-**Optional:** Install `@nestjs/event-emitter` to enable translation change events.
+**Optional:**
+- Install `@nestjs/event-emitter` to enable translation change events
+- Install `@nestjs/graphql` to enable GraphQL resolver support
 
 ## Quick Start
 
@@ -391,6 +394,60 @@ export class AdminProductController {
   }
 }
 ```
+
+## GraphQL Support
+
+The `TranslatableInterceptor` works seamlessly with GraphQL resolvers. It detects the execution context type automatically — no extra configuration needed.
+
+**Optional peer dependency:** Install `@nestjs/graphql` to enable GraphQL support.
+
+### Setup
+
+Pass the HTTP request through your GraphQL context (this is the standard NestJS pattern):
+
+```typescript
+// app.module.ts
+GraphQLModule.forRoot<ApolloDriverConfig>({
+  driver: ApolloDriver,
+  context: ({ req }) => ({ req }), // pass request to GQL context
+});
+```
+
+The interceptor reads `Accept-Language` from the underlying HTTP request headers, just like REST:
+
+```typescript
+@Resolver(() => Product)
+export class ProductResolver {
+  @Query(() => [Product])
+  products() {
+    return this.repo.find();
+  }
+}
+```
+
+```graphql
+# With Accept-Language: ar header
+query { products { name slug } }
+# → { "data": { "products": [{ "name": "حاسوب محمول", "slug": "laptop" }] } }
+```
+
+`@SkipTranslation()` works on resolvers too:
+
+```typescript
+@SkipTranslation()
+@Query(() => [Product])
+adminProducts() {
+  return this.repo.find();
+  // Always returns full JSON maps
+}
+```
+
+### How it works
+
+The interceptor checks `context.getType()`:
+- **`'http'`** — reads `Accept-Language` from the HTTP request
+- **`'graphql'`** — reads `Accept-Language` from `context.getArgs()[2].req.headers` (the GraphQL context's underlying request)
+- **Other types** — passes data through without resolution
 
 ## Using the Service Directly
 

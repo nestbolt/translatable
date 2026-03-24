@@ -47,6 +47,7 @@ function createMockContext(
   controller: new (...args: any[]) => any,
 ) {
   return {
+    getType: () => "http",
     switchToHttp: () => ({
       getRequest: () => ({
         headers: acceptLanguage ? { "accept-language": acceptLanguage } : {},
