@@ -13,12 +13,10 @@ export interface IsTranslationsOptions {
 @ValidatorConstraint({ name: "isTranslations", async: false })
 @Injectable()
 export class IsTranslationsConstraint implements ValidatorConstraintInterface {
-  private requiredLocales: string[] = [];
-
   constructor(@Optional() private readonly service?: TranslatableService) {}
 
   validate(value: unknown, args?: ValidationArguments): boolean {
-    this.requiredLocales =
+    const requiredLocales =
       (args?.constraints?.[0] as IsTranslationsOptions)?.requiredLocales ?? [];
 
     if (typeof value !== "object" || value === null || Array.isArray(value)) {
@@ -30,7 +28,7 @@ export class IsTranslationsConstraint implements ValidatorConstraintInterface {
       if (typeof val !== "string" && val !== null) return false;
     }
 
-    for (const locale of this.requiredLocales) {
+    for (const locale of requiredLocales) {
       const val = (value as Record<string, unknown>)[locale];
       if (val == null || val === "") return false;
     }
