@@ -163,6 +163,48 @@ describe("TranslatableMixin", () => {
       entity.setTranslation("name", "fr", "Bonjour");
       expect(entity.getTranslation("name", "en")).toBeNull();
     });
+
+    it("should try fallback chain in order", async () => {
+      await setupService({ fallbackLocales: ["en", "fr", "ar"] });
+
+      entity.setTranslation("name", "fr", "Bonjour");
+      entity.setTranslation("name", "ar", "مرحبا");
+
+      // "en" missing, "fr" available → returns "fr"
+      expect(entity.getTranslation("name", "de")).toBe("Bonjour");
+    });
+
+    it("should skip missing chain locales and use next available", async () => {
+      await setupService({ fallbackLocales: ["en", "fr", "ar"] });
+
+      entity.setTranslation("name", "ar", "مرحبا");
+
+      // "en" missing, "fr" missing, "ar" available → returns "ar"
+      expect(entity.getTranslation("name", "de")).toBe("مرحبا");
+    });
+
+    it("should exhaust chain before using fallbackAny", async () => {
+      await setupService({
+        fallbackLocales: ["en", "fr"],
+        fallbackAny: true,
+      });
+
+      entity.setTranslation("name", "ja", "こんにちは");
+
+      // chain exhausted, fallbackAny picks first available
+      expect(entity.getTranslation("name", "de")).toBe("こんにちは");
+    });
+
+    it("should return null when chain exhausted and fallbackAny is false", async () => {
+      await setupService({
+        fallbackLocales: ["en", "fr"],
+        fallbackAny: false,
+      });
+
+      entity.setTranslation("name", "ja", "こんにちは");
+
+      expect(entity.getTranslation("name", "de")).toBeNull();
+    });
   });
 
   describe("current locale", () => {

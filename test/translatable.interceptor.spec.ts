@@ -150,6 +150,53 @@ describe("TranslatableInterceptor", () => {
       expect(result.name).toBeNull();
     });
 
+    it("should use fallback chain when requested locale is missing", async () => {
+      // Create a separate module with fallbackLocales chain
+      const chainModule = await Test.createTestingModule({
+        providers: [
+          {
+            provide: TRANSLATABLE_OPTIONS,
+            useValue: {
+              defaultLocale: "en",
+              fallbackLocales: ["en", "fr", "ar"],
+            },
+          },
+          TranslatableService,
+          TranslatableInterceptor,
+        ],
+      }).compile();
+
+      const chainService =
+        chainModule.get<TranslatableService>(TranslatableService);
+      const chainInterceptor = chainModule.get<TranslatableInterceptor>(
+        TranslatableInterceptor,
+      );
+      chainService.onModuleInit();
+
+      const entity = new TestProduct();
+      entity.name = { fr: "Bonjour", ar: "مرحبا" };
+      entity.description = { ar: "تحية" };
+      entity.slug = "hello";
+
+      const context = createMockContext("de");
+
+      const result = await new Promise<any>((resolve) => {
+        chainService.runWithLocale("de", () => {
+          firstValueFrom(
+            chainInterceptor.intercept(context, createMockHandler(entity)),
+          ).then(resolve);
+        });
+      });
+
+      // "en" missing, "fr" available for name → "Bonjour"
+      expect(result.name).toBe("Bonjour");
+      // "en" missing, "fr" missing, "ar" available for description → "تحية"
+      expect(result.description).toBe("تحية");
+      expect(result.slug).toBe("hello");
+
+      TranslatableService.resetInstance();
+    });
+
     it("should handle nested entity in plain object wrapper", async () => {
       const entity = new TestProduct();
       entity.name = { en: "Hello", ar: "مرحبا" };

@@ -1,6 +1,8 @@
 export interface TranslatableModuleOptions {
   defaultLocale?: string;
+  /** @deprecated Use `fallbackLocales` instead. Kept for backward compatibility. */
   fallbackLocale?: string;
+  fallbackLocales?: string[];
   fallbackAny?: boolean;
 }
 
