@@ -493,4 +493,122 @@ describe("TranslatableMixin", () => {
       expect(entity.getTranslations("name")).toEqual({});
     });
   });
+
+  describe("getMissingLocales", () => {
+    it("should return locales that are missing translations", async () => {
+      await setupService();
+
+      entity.setTranslation("name", "en", "Hello");
+      entity.setTranslation("name", "ar", "مرحبا");
+
+      expect(entity.getMissingLocales("name", ["en", "ar", "fr"])).toEqual([
+        "fr",
+      ]);
+    });
+
+    it("should return empty array when all locales are present", async () => {
+      await setupService();
+
+      entity.setTranslation("name", "en", "Hello");
+      entity.setTranslation("name", "ar", "مرحبا");
+
+      expect(entity.getMissingLocales("name", ["en", "ar"])).toEqual([]);
+    });
+
+    it("should return all locales when field has no translations", async () => {
+      await setupService();
+
+      expect(entity.getMissingLocales("name", ["en", "ar", "fr"])).toEqual([
+        "en",
+        "ar",
+        "fr",
+      ]);
+    });
+
+    it("should throw for non-translatable attribute", async () => {
+      await setupService();
+
+      expect(() => entity.getMissingLocales("slug", ["en"])).toThrow();
+    });
+  });
+
+  describe("isFullyTranslated", () => {
+    it("should return true when all fields have all locales", async () => {
+      await setupService();
+
+      entity
+        .setTranslation("name", "en", "Hello")
+        .setTranslation("name", "ar", "مرحبا")
+        .setTranslation("description", "en", "A greeting")
+        .setTranslation("description", "ar", "تحية");
+
+      expect(entity.isFullyTranslated(["en", "ar"])).toBe(true);
+    });
+
+    it("should return false when any field is missing a locale", async () => {
+      await setupService();
+
+      entity
+        .setTranslation("name", "en", "Hello")
+        .setTranslation("name", "ar", "مرحبا")
+        .setTranslation("description", "en", "A greeting");
+      // description missing 'ar'
+
+      expect(entity.isFullyTranslated(["en", "ar"])).toBe(false);
+    });
+
+    it("should return true for empty locales array", async () => {
+      await setupService();
+
+      expect(entity.isFullyTranslated([])).toBe(true);
+    });
+
+    it("should return false when no translations exist", async () => {
+      await setupService();
+
+      expect(entity.isFullyTranslated(["en"])).toBe(false);
+    });
+  });
+
+  describe("getTranslationCompleteness", () => {
+    it("should return completeness report for all fields", async () => {
+      await setupService();
+
+      entity
+        .setTranslation("name", "en", "Hello")
+        .setTranslation("name", "ar", "مرحبا")
+        .setTranslation("description", "en", "A greeting");
+
+      const report = entity.getTranslationCompleteness(["en", "ar", "fr"]);
+
+      expect(report).toEqual({
+        name: { en: true, ar: true, fr: false },
+        description: { en: true, ar: false, fr: false },
+      });
+    });
+
+    it("should return all false when no translations exist", async () => {
+      await setupService();
+
+      const report = entity.getTranslationCompleteness(["en", "ar"]);
+
+      expect(report).toEqual({
+        name: { en: false, ar: false },
+        description: { en: false, ar: false },
+      });
+    });
+
+    it("should return empty locale maps for empty locales array", async () => {
+      await setupService();
+
+      entity.setTranslation("name", "en", "Hello");
+
+      const report = entity.getTranslationCompleteness([]);
+
+      expect(report).toEqual({
+        name: {},
+        description: {},
+      });
+    });
+  });
 });

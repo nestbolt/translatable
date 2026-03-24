@@ -26,6 +26,8 @@ function createMockContext(acceptLanguage?: string) {
         headers: acceptLanguage ? { "accept-language": acceptLanguage } : {},
       }),
     }),
+    getHandler: () => () => null,
+    getClass: () => class {},
   } as any;
 }
 
