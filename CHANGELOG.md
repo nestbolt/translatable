@@ -2,6 +2,22 @@
 
 All notable changes to `@nestbolt/translatable` will be documented in this file.
 
+## v0.4.0 — Fallback Locale Chain & GraphQL Support
+
+### Features
+
+- **Fallback Locale Chain** — Support an ordered list of fallback locales instead of a single fallback
+  - `fallbackLocales: ['en', 'fr', 'ar']` — tries each in order when the requested locale is missing
+  - `fallbackLocale` still works as backward-compatible shorthand (deprecated)
+  - Empty `fallbackLocales: []` normalizes to `[defaultLocale]`
+  - New `getFallbackLocales()` getter on `TranslatableService`
+- **GraphQL Support** — `TranslatableInterceptor` now works with GraphQL resolvers
+  - Auto-detects execution context type (`http` vs `graphql`)
+  - Reads `Accept-Language` from the GraphQL context's underlying HTTP request
+  - `@SkipTranslation()` works on resolvers and resolver classes
+  - No runtime dependency on `@nestjs/graphql` — reads args directly
+  - Added `@nestjs/graphql` and `@nestjs/event-emitter` as proper optional peer dependencies
+
 ## v0.3.1 — Validation Fixes
 
 ### Fixes
