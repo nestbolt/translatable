@@ -2,7 +2,9 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import "reflect-metadata";
 import { of, firstValueFrom } from "rxjs";
 import { Test, TestingModule } from "@nestjs/testing";
+import { Controller } from "@nestjs/common";
 import { Translatable } from "../src/decorators/translatable.decorator";
+import { SkipTranslation } from "../src/decorators/skip-translation.decorator";
 import { TranslatableMixin } from "../src/mixins/translatable.mixin";
 import { TranslatableInterceptor } from "../src/middleware/translatable.interceptor";
 import { TranslatableService } from "../src/translatable.service";
@@ -188,6 +190,82 @@ describe("TranslatableInterceptor — GraphQL support", () => {
       );
 
       expect(result.name).toEqual({ en: "Hello" });
+    });
+  });
+
+  describe("@SkipTranslation in GraphQL context", () => {
+    class MockResolver {
+      products() {
+        return [];
+      }
+
+      @SkipTranslation()
+      adminProducts() {
+        return [];
+      }
+    }
+
+    @SkipTranslation()
+    @Controller("admin")
+    class SkippedResolver {
+      products() {
+        return [];
+      }
+    }
+
+    it("should skip resolution when @SkipTranslation() is on the handler", async () => {
+      const entity = new TestProduct();
+      entity.name = { en: "Hello", ar: "مرحبا" };
+
+      const context = {
+        getType: () => "graphql",
+        getArgs: () => [
+          {},
+          {},
+          { req: { headers: { "accept-language": "ar" } } },
+          {},
+        ],
+        getHandler: () => MockResolver.prototype.adminProducts,
+        getClass: () => MockResolver,
+      } as any;
+
+      const result = await new Promise<any>((resolve) => {
+        service.runWithLocale("ar", () => {
+          firstValueFrom(
+            interceptor.intercept(context, createMockHandler(entity)),
+          ).then(resolve);
+        });
+      });
+
+      // Full JSON returned, not resolved
+      expect(result.name).toEqual({ en: "Hello", ar: "مرحبا" });
+    });
+
+    it("should skip resolution when @SkipTranslation() is on the class", async () => {
+      const entity = new TestProduct();
+      entity.name = { en: "Hello", ar: "مرحبا" };
+
+      const context = {
+        getType: () => "graphql",
+        getArgs: () => [
+          {},
+          {},
+          { req: { headers: { "accept-language": "ar" } } },
+          {},
+        ],
+        getHandler: () => SkippedResolver.prototype.products,
+        getClass: () => SkippedResolver,
+      } as any;
+
+      const result = await new Promise<any>((resolve) => {
+        service.runWithLocale("ar", () => {
+          firstValueFrom(
+            interceptor.intercept(context, createMockHandler(entity)),
+          ).then(resolve);
+        });
+      });
+
+      expect(result.name).toEqual({ en: "Hello", ar: "مرحبا" });
     });
   });
 
