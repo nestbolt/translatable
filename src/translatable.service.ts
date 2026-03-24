@@ -18,7 +18,7 @@ export class TranslatableService implements OnModuleInit {
   private readonly localeStorage = new AsyncLocalStorage<string>();
 
   private readonly defaultLocale: string;
-  private readonly fallbackLocale: string;
+  private readonly fallbackLocales: string[];
   private readonly fallbackAny: boolean;
 
   private eventEmitter: any = null;
@@ -29,7 +29,11 @@ export class TranslatableService implements OnModuleInit {
     @Optional() @Inject("EventEmitter2") eventEmitter?: any,
   ) {
     this.defaultLocale = options.defaultLocale ?? "en";
-    this.fallbackLocale = options.fallbackLocale ?? this.defaultLocale;
+    this.fallbackLocales =
+      options.fallbackLocales ??
+      (options.fallbackLocale
+        ? [options.fallbackLocale]
+        : [this.defaultLocale]);
     this.fallbackAny = options.fallbackAny ?? false;
 
     if (eventEmitter) {
@@ -40,7 +44,7 @@ export class TranslatableService implements OnModuleInit {
   onModuleInit(): void {
     TranslatableService.instance = this;
     this.logger.log(
-      `Initialized with defaultLocale="${this.defaultLocale}", fallbackLocale="${this.fallbackLocale}"`,
+      `Initialized with defaultLocale="${this.defaultLocale}", fallbackLocales=[${this.fallbackLocales.map((l) => `"${l}"`).join(", ")}]`,
     );
   }
 
@@ -57,7 +61,11 @@ export class TranslatableService implements OnModuleInit {
   }
 
   getFallbackLocale(): string {
-    return this.fallbackLocale;
+    return this.fallbackLocales[0] ?? this.defaultLocale;
+  }
+
+  getFallbackLocales(): string[] {
+    return [...this.fallbackLocales];
   }
 
   getFallbackAny(): boolean {
@@ -85,8 +93,10 @@ export class TranslatableService implements OnModuleInit {
       return requestedLocale;
     }
 
-    if (translatedLocales.includes(this.fallbackLocale)) {
-      return this.fallbackLocale;
+    for (const fallback of this.fallbackLocales) {
+      if (translatedLocales.includes(fallback)) {
+        return fallback;
+      }
     }
 
     if (this.fallbackAny && translatedLocales.length > 0) {

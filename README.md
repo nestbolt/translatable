@@ -105,7 +105,7 @@ import { TranslatableModule } from "@nestbolt/translatable";
     }),
     TranslatableModule.forRoot({
       defaultLocale: "en",
-      fallbackLocale: "en",
+      fallbackLocales: ["en"],
     }),
   ],
 })
@@ -198,7 +198,7 @@ import {
   imports: [
     TranslatableModule.forRoot({
       defaultLocale: "en",
-      fallbackLocale: "en",
+      fallbackLocales: ["en"],
     }),
   ],
 })
@@ -233,10 +233,22 @@ export class ProductController {
 
 ### Fallback Behavior
 
-When the requested locale is missing for a field, the interceptor falls back to:
-1. The configured `fallbackLocale` (default: `'en'`)
-2. Any available locale (if `fallbackAny: true` is configured)
-3. `null` if no translation is found
+When the requested locale is missing for a field, the system tries each locale in the `fallbackLocales` chain in order:
+
+```typescript
+TranslatableModule.forRoot({
+  fallbackLocales: ['en', 'fr', 'ar'],  // tries each in order
+})
+
+// Request 'de', entity has { fr: 'Bonjour', ar: 'مرحبا' }
+entity.getTranslation('name', 'de'); // 'Bonjour' — skipped 'en', found 'fr'
+```
+
+Resolution order:
+1. The requested locale
+2. Each locale in `fallbackLocales` in order (default: `['en']`)
+3. Any available locale (if `fallbackAny: true` is configured)
+4. `null` if no translation is found
 
 ### Wrapped Responses
 
@@ -261,7 +273,7 @@ async findAll() {
 ```typescript
 TranslatableModule.forRoot({
   defaultLocale: "en",
-  fallbackLocale: "en",
+  fallbackLocales: ["en", "fr", "ar"],
   fallbackAny: false,
 });
 ```
@@ -273,7 +285,7 @@ TranslatableModule.forRootAsync({
   imports: [ConfigModule],
   useFactory: (config: ConfigService) => ({
     defaultLocale: config.get("DEFAULT_LOCALE"),
-    fallbackLocale: config.get("FALLBACK_LOCALE"),
+    fallbackLocales: config.get("FALLBACK_LOCALES"),
   }),
   inject: [ConfigService],
 });
@@ -400,7 +412,8 @@ export class MyService {
 | -------------------------------------------------- | -------- | ------------------------------------------------------ |
 | `getLocale()`                                      | `string` | Get current locale (from AsyncLocalStorage or default) |
 | `getDefaultLocale()`                               | `string` | Get configured default locale                          |
-| `getFallbackLocale()`                              | `string` | Get configured fallback locale                         |
+| `getFallbackLocale()`                              | `string`   | Get first fallback locale (backward compat)            |
+| `getFallbackLocales()`                             | `string[]` | Get the full fallback locale chain                     |
 | `runWithLocale(locale, fn)`                        | `T`      | Execute a function with a specific locale context      |
 | `resolveLocale(requested, available, useFallback)` | `string` | Resolve the best locale to use                         |
 
@@ -480,11 +493,12 @@ export class TranslationListener {
 
 ## Configuration Options
 
-| Option           | Type      | Default         | Description                                                                             |
-| ---------------- | --------- | --------------- | --------------------------------------------------------------------------------------- |
-| `defaultLocale`  | `string`  | `'en'`          | Default locale when none is set                                                         |
-| `fallbackLocale` | `string`  | `defaultLocale` | Locale to fall back to when a translation is missing                                    |
-| `fallbackAny`    | `boolean` | `false`         | If true, fall back to any available locale when both requested and fallback are missing |
+| Option            | Type       | Default            | Description                                                                            |
+| ----------------- | ---------- | ------------------ | -------------------------------------------------------------------------------------- |
+| `defaultLocale`   | `string`   | `'en'`             | Default locale when none is set                                                        |
+| `fallbackLocales` | `string[]` | `[defaultLocale]`  | Ordered list of fallback locales to try when a translation is missing                  |
+| `fallbackLocale`  | `string`   | —                  | Shorthand for a single fallback (sets `fallbackLocales: [value]`). Deprecated.         |
+| `fallbackAny`     | `boolean`  | `false`            | If true, fall back to any available locale when the chain is exhausted                 |
 
 ## Standalone Usage
 

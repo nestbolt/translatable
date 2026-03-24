@@ -52,6 +52,7 @@ describe("TranslatableService", () => {
 
       expect(service.getDefaultLocale()).toBe("ar");
       expect(service.getFallbackLocale()).toBe("fr");
+      expect(service.getFallbackLocales()).toEqual(["fr"]);
       expect(service.getFallbackAny()).toBe(true);
     });
 
@@ -59,6 +60,36 @@ describe("TranslatableService", () => {
       service = await createService({ defaultLocale: "fr" });
 
       expect(service.getFallbackLocale()).toBe("fr");
+      expect(service.getFallbackLocales()).toEqual(["fr"]);
+    });
+
+    it("should accept fallbackLocales array", async () => {
+      service = await createService({
+        fallbackLocales: ["en", "fr", "ar"],
+      });
+
+      expect(service.getFallbackLocales()).toEqual(["en", "fr", "ar"]);
+      expect(service.getFallbackLocale()).toBe("en");
+    });
+
+    it("should prefer fallbackLocales over fallbackLocale", async () => {
+      service = await createService({
+        fallbackLocale: "de",
+        fallbackLocales: ["en", "fr"],
+      });
+
+      expect(service.getFallbackLocales()).toEqual(["en", "fr"]);
+      expect(service.getFallbackLocale()).toBe("en");
+    });
+
+    it("should fall back to defaultLocale when fallbackLocales is empty", async () => {
+      service = await createService({
+        defaultLocale: "ar",
+        fallbackLocales: [],
+      });
+
+      expect(service.getFallbackLocales()).toEqual([]);
+      expect(service.getFallbackLocale()).toBe("ar");
     });
 
     it("should set static instance on module init", async () => {
@@ -155,6 +186,47 @@ describe("TranslatableService", () => {
 
       const result = service.resolveLocale("fr", [], true);
       expect(result).toBe("fr");
+    });
+
+    it("should try fallback chain in order", async () => {
+      service = await createService({
+        fallbackLocales: ["en", "fr", "ar"],
+      });
+
+      // "en" missing, "fr" available → returns "fr"
+      const result = service.resolveLocale("de", ["fr", "ar"], true);
+      expect(result).toBe("fr");
+    });
+
+    it("should try second fallback when first is also missing", async () => {
+      service = await createService({
+        fallbackLocales: ["en", "fr", "ar"],
+      });
+
+      // "en" missing, "fr" missing, "ar" available → returns "ar"
+      const result = service.resolveLocale("de", ["ar", "ja"], true);
+      expect(result).toBe("ar");
+    });
+
+    it("should fall through entire chain before using fallbackAny", async () => {
+      service = await createService({
+        fallbackLocales: ["en", "fr"],
+        fallbackAny: true,
+      });
+
+      // chain exhausted, fallbackAny picks first available
+      const result = service.resolveLocale("de", ["ja", "ko"], true);
+      expect(result).toBe("ja");
+    });
+
+    it("should return requested locale when chain is exhausted and fallbackAny is false", async () => {
+      service = await createService({
+        fallbackLocales: ["en", "fr"],
+        fallbackAny: false,
+      });
+
+      const result = service.resolveLocale("de", ["ja", "ko"], true);
+      expect(result).toBe("de");
     });
   });
 
