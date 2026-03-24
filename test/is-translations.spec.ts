@@ -163,4 +163,14 @@ describe("IsTranslations decorator", () => {
       expect(message).toContain("ar");
     });
   });
+
+  describe("symbol property keys", () => {
+    it("should throw when applied to a symbol-keyed property", () => {
+      expect(() => {
+        const sym = Symbol("test");
+        const decorator = IsTranslations();
+        decorator({} as any, sym);
+      }).toThrow("symbol-keyed properties");
+    });
+  });
 });
